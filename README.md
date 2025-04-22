@@ -1,1 +1,1 @@
-Proyecto inicializado con Git y Gitmoji.
+# Proyecto inicializado con Git y Gitmoji
