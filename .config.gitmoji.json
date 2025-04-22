@@ -1,0 +1,14 @@
+[
+  { "emoji": "💡", "code": ":bulb:", "description": "Nueva funcionalidad", "name": "new" },
+  { "emoji": "🐛", "code": ":bug:", "description": "Corregir un bug", "name": "bugfix" },
+  { "emoji": "📝", "code": ":memo:", "description": "Actualizar documentación", "name": "docs" },
+  { "emoji": "🎨", "code": ":art:", "description": "Estilo/Formato del código", "name": "style" },
+  { "emoji": "🔥", "code": ":fire:", "description": "Eliminar código o archivos", "name": "remove" },
+  { "emoji": "⚡", "code": ":zap:", "description": "Mejora de rendimiento", "name": "perform" },
+  { "emoji": "🚧", "code": ":construction:", "description": "Trabajo en progreso", "name": "wip" },
+  { "emoji": "🧪", "code": ":test_tube:", "description": "Agregar pruebas", "name": "tests" },
+  { "emoji": "🔧", "code": ":wrench:", "description": "Cambiar configuración del proyecto", "name": "config" },
+  { "emoji": "🌐", "code": ":wrglobe_with_meridiansench:", "description": "Internacionalización", "name": "inter" },
+  { "emoji": "📕", "code": ":pencil2:", "description": "Errores tipográficos", "name": "typo" },
+  { "emoji": "📦", "code": ":package:", "description": "Compilación o generacion de paquetes", "name": "pack"}
+]
