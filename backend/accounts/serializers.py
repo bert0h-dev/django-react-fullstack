@@ -3,6 +3,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.serializers  import TokenObtainPairSerializer
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 
 import re
 from django.utils import timezone
@@ -30,6 +31,7 @@ class UserSerializer(serializers.ModelSerializer):
       'id', 'email', 'username', 
       'first_name', 'last_name', 
       'first_surname', 'last_surname', 
+      'user_type', 'department',
       'is_verified', 'is_active', 
       'last_activity', 'last_activity_local', 
       'timezone', 'last_ip'
@@ -65,9 +67,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
       'first_name', 'last_name', 
       'first_surname', 'last_surname', 
       'phone_number', 'department', 
-      'position', 'language', 
-      'timezone', 'last_activity',
-      'last_activity_local',
+      'position', 'user_type',
+      'language', 'timezone', 
+      'last_activity', 'last_activity_local',
     ]
     read_only_fields = ['id', 'email', 'username', 'last_activity']
 
@@ -99,7 +101,7 @@ class UpdateProfileSerializer(serializers.ModelSerializer):
       'first_surname', 'last_surname', 
       'phone_number', 'department', 
       'position', 'language', 
-      'timezone'
+      'timezone',
     ]
     extra_kwargs = {
       'first_name': {'required': False},
@@ -157,7 +159,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = User
-    fields = ['email', 'username', 'password', 'first_name', 'last_name', 'first_surname', 'last_surname']
+    fields = ['email', 'username', 'password', 'first_name', 'last_name', 'first_surname', 'last_surname', 'user_type']
     
   def validate_email(self, value):
     email_regex = r'^[\w\.-]+@[\w\.-]+\.\w+$'
@@ -213,6 +215,7 @@ class RegisterSerializer(serializers.ModelSerializer):
       last_name=validated_data.get('last_name', ''),
       first_surname=validated_data.get('first_surname', ''),
       last_surname=validated_data.get('last_surname', ''),
+      user_type=validated_data.get('user_type', 'user'),
     )
     user.set_password(validated_data['password'])
     user.is_verified = False
@@ -228,12 +231,39 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     return user
 
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+class AssignRolesSerializer(serializers.ModelSerializer):
+  groups = serializers.PrimaryKeyRelatedField(
+    queryset=Group.objects.all(),
+    many=True
+  )
+
+  class Meta:
+    model = User
+    fields = ['id', 'groups']
+
+class UserRolesSerializer(serializers.ModelSerializer):
+  roles = serializers.SerializerMethodField()
+
+  class Meta:
+    model = User
+    fields = ['id', 'roles']
+
+  def get_roles(self, obj):
+    return [
+      {
+        "id": group.id,
+        "name": group.name,
+      }
+      for group in obj.groups.all()
+    ]
+
+class LoginSerializer(TokenObtainPairSerializer):
   """
   Se obtiene el token de acceso y el token de actualización
   """
 
   def validate(self, attrs):
+    request = self.context.get('request')
     login = attrs.get("email")
     password = attrs.get("password")
 
@@ -252,10 +282,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     
     if not user.is_active:
       raise validation_error("account_disabled")
-    
-    # Actualizar el campo de última actividad
-    user.last_activity = timezone.now()
-    user.save(update_fields=['last_activity'])
     
     # Autenticación correcta: generar tokens
     refresh = RefreshToken.for_user(user)

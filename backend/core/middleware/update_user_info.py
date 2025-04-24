@@ -1,5 +1,5 @@
 from django.utils.timezone import now
-from core.utils import get_client_ip
+from core.utils.base import get_client_ip
 import logging
 
 logger = logging.getLogger(__name__)

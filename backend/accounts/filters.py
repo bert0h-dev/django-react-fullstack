@@ -4,14 +4,15 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class UserFilter(django_filters.FilterSet):
-  email = django_filters.CharFilter(lookup_expr='icontains')
-  first_name = django_filters.CharFilter(lookup_expr='icontains')
-  last_name = django_filters.CharFilter(lookup_expr='icontains')
-  first_surname = django_filters.CharFilter(lookup_expr='icontains')
-  last_surname = django_filters.CharFilter(lookup_expr='icontains')
-  is_active = django_filters.BooleanFilter()
-  is_verified = django_filters.BooleanFilter()
-
   class Meta:
     model = User
-    fields = ['email', 'first_name', 'last_name', 'first_surname', 'last_surname', 'is_active', 'is_verified']
+    fields = {
+      'email': ['icontains'], 
+      'first_name': ['icontains'], 
+      'last_name': ['icontains'], 
+      'first_surname': ['icontains'], 
+      'last_surname': ['icontains'], 
+      'is_active': ['exact'], 
+      'is_verified': ['exact'],
+      'user_type': ['exact'],
+    }

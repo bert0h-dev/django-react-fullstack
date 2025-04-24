@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from decouple import config
 from datetime import timedelta
@@ -40,7 +41,12 @@ MIDDLEWARE = [
 
     # Middleware para actualizar la actividad del usuario
     'core.middleware.update_user_info.UpdateUserInfoMiddleware',
+    # Middleware para obtener el idioma del usuario
+    'core.middleware.language_from_user.LanguageFromUserMiddleware',
+    # Middleware para guardar el usuario del request
+    'core.middleware.thread_user.ThreadLocalUserMiddleware',
 
+    'django.middleware.locale.LocaleMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -87,10 +93,27 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es'
 TIME_ZONE = 'UTC'
 USE_I18N = True
+USE_L10N = True
 USE_TZ = True
+
+LANGUAGES = [
+    ('es', 'Español'),
+    ('en', 'English'),
+]
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
+]
+
+# Permisos definidos por defecto
+PROJECT_PERMISSION_APPS = [
+    'auth',
+    'accounts',
+    'core',
+]
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'

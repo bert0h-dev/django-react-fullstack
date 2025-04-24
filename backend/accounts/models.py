@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractUser, PermissionsMixin, BaseUserManager
 
 class CustomUserManager(BaseUserManager):
@@ -27,6 +28,16 @@ class CustomUserManager(BaseUserManager):
 
 # Se crea modelo para el manejo del usuario personalizado
 class User(AbstractUser, PermissionsMixin):
+  USER_TYPE_CHOICES = (
+    ('admin', 'Administrador'),
+    ('user', 'Usuario'),
+  )
+
+  LANGUAGE_CHOICES = [
+    ('es', _('Español')),
+    ('en', _('Inglés')),
+  ]
+
   #Identificacion
   email = models.EmailField(unique=True, verbose_name='email')
   username = models.CharField(max_length=150, unique=True, null=True, blank=True, verbose_name='username')
@@ -34,6 +45,7 @@ class User(AbstractUser, PermissionsMixin):
   last_name = models.CharField(max_length=150, null=True, blank=True, verbose_name='last name')
   first_surname = models.CharField(max_length=150, verbose_name='first surname')
   last_surname = models.CharField(max_length=150, null=True, blank=True, verbose_name='last surname')
+  user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default='user', verbose_name='user type')
 
   # Perfil
   phone_number = models.CharField(max_length=15, null=True, blank=True, verbose_name='phone number')
@@ -41,7 +53,7 @@ class User(AbstractUser, PermissionsMixin):
   position = models.CharField(max_length=50, null=True, blank=True, verbose_name='position')
 
   # Preferencias
-  language = models.CharField(max_length=10, default='es', verbose_name='language')
+  language = models.CharField(max_length=10, choices=LANGUAGE_CHOICES, default='es', verbose_name='language')
   timezone = models.CharField(max_length=50, default='America/Mexico_City', verbose_name='timezone')
 
   # Seguridad
@@ -62,6 +74,8 @@ class User(AbstractUser, PermissionsMixin):
   REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'first_surname', 'last_surname']
 
   class Meta:
+    verbose_name = "usuario"
+    verbose_name_plural = "usuarios"
     ordering = ['-date_joined']
     db_table = 'accounts_user'
     indexes = [
