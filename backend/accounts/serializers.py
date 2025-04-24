@@ -5,8 +5,10 @@ from rest_framework_simplejwt.serializers  import TokenObtainPairSerializer
 from django.contrib.auth import get_user_model
 
 import re
+from django.utils import timezone
+from zoneinfo import ZoneInfo
+
 from core.messages import ACCOUNT_ERRORS
-from datetime import timezone
 from .models import User
 
 User = get_user_model()
@@ -20,9 +22,131 @@ class UserSerializer(serializers.ModelSerializer):
   Listar los usuarios
   """
 
+  last_activity_local = serializers.SerializerMethodField()
+
   class Meta:
     model = User
-    fields = ['id', 'email', 'first_name', 'last_name', 'first_surname', 'last_surname', 'is_verified', 'is_active', 'last_activity']
+    fields = [
+      'id', 'email', 'username', 
+      'first_name', 'last_name', 
+      'first_surname', 'last_surname', 
+      'is_verified', 'is_active', 
+      'last_activity', 'last_activity_local', 
+      'timezone', 'last_ip'
+    ]
+
+  def get_last_activity_local(self, obj):
+    if not obj.last_activity:
+      return None
+    
+    # Convertir la fecha y hora UTC a la zona horaria del usuario
+    try:
+      tz = ZoneInfo(obj.timezone or "UTC")
+    except Exception:
+      tz = ZoneInfo("UTC")
+
+    dt = obj.last_activity
+    if timezone.is_naive(dt):
+      dt = timezone.make_aware(dt)
+    
+    return timezone.localtime(dt, timezone=tz).strftime("%Y-%m-%d %H:%M:%S")
+
+class UserProfileSerializer(serializers.ModelSerializer):
+  """
+  Obtener el perfil del usuario
+  """
+
+  last_activity_local = serializers.SerializerMethodField()
+
+  class Meta:
+    model = User
+    fields = [
+      'id', 'email', 'username', 
+      'first_name', 'last_name', 
+      'first_surname', 'last_surname', 
+      'phone_number', 'department', 
+      'position', 'language', 
+      'timezone', 'last_activity',
+      'last_activity_local',
+    ]
+    read_only_fields = ['id', 'email', 'username', 'last_activity']
+
+  def get_last_activity_local(self, obj):
+    if not obj.last_activity:
+      return None
+    
+    # Convertir la fecha y hora UTC a la zona horaria del usuario
+    try:
+      tz = ZoneInfo(obj.timezone or "UTC")
+    except Exception:
+      tz = ZoneInfo("UTC")
+
+    dt = obj.last_activity
+    if timezone.is_naive(dt):
+      dt = timezone.make_aware(dt)
+    
+    return timezone.localtime(dt, timezone=tz).strftime("%Y-%m-%d %H:%M:%S")
+
+class UpdateProfileSerializer(serializers.ModelSerializer):
+  """
+  Actualizar el perfil del usuario
+  """
+
+  class Meta:
+    model = User
+    fields = [
+      'first_name', 'last_name', 
+      'first_surname', 'last_surname', 
+      'phone_number', 'department', 
+      'position', 'language', 
+      'timezone'
+    ]
+    extra_kwargs = {
+      'first_name': {'required': False},
+      'last_name': {'required': False},
+      'first_surname': {'required': False},
+      'last_surname': {'required': False},
+      'phone_number': {'required': False},
+      'department': {'required': False},
+      'position': {'required': False},
+      'language': {'required': False},
+      'timezone': {'required': False},
+    }
+
+  def update(self, instance, validated_data):
+    # Actualizar los campos del perfil
+    for attr, value in validated_data.items():
+      setattr(instance, attr, value)
+    # Guardar los cambios
+    instance.save()
+    return instance
+
+class ChangePasswordSerializer(serializers.Serializer):
+  """
+  Cambiar la contraseña del usuario
+  """
+
+  current_password = serializers.CharField(write_only=True)
+  new_password = serializers.CharField(write_only=True)
+  confirm_password = serializers.CharField(write_only=True)
+
+  def validate(self, attrs):
+    user = self.context['request'].user
+
+    if not user.check_password(attrs.get('current_password')):
+      raise validation_error("invalid_current_password")
+
+    if attrs.get('new_password') != attrs.get('confirm_password'):
+      raise validation_error("passwords_do_not_match")
+
+    return attrs
+
+  def save(self, **kwargs):
+    user = self.context['request'].user
+    user.set_password(self.validated_data['new_password'])
+    user.requires_password_reset = False
+    user.save()
+    return user
 
 class RegisterSerializer(serializers.ModelSerializer):
   """
@@ -89,7 +213,6 @@ class RegisterSerializer(serializers.ModelSerializer):
       last_name=validated_data.get('last_name', ''),
       first_surname=validated_data.get('first_surname', ''),
       last_surname=validated_data.get('last_surname', ''),
-      last_activity=timezone.now(),
     )
     user.set_password(validated_data['password'])
     user.is_verified = False
@@ -111,26 +234,24 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
   """
 
   def validate(self, attrs):
-    login = attrs.get("username")  # puede ser username o email
+    login = attrs.get("email")
     password = attrs.get("password")
 
     # Buscar por email o username
     user = User.objects.filter(email__iexact=login).first()
-    if not user:
-      user = User.objects.filter(username__iexact=login).first()
 
     if user is None:
-      raise validation_error("username", "user_not_found")
+      raise validation_error("user_not_found")
     
     if not user.check_password(password):
-      raise validation_error("password", "invalid_password")
+      raise validation_error("invalid_password")
 
     # Se valida si el usuario esta verificado
     if not user.is_verified:
-      raise validation_error("verified", "not_verified")
+      raise validation_error("not_verified")
     
     if not user.is_active:
-      raise validation_error("active", "account_disabled")
+      raise validation_error("account_disabled")
     
     # Actualizar el campo de última actividad
     user.last_activity = timezone.now()
@@ -156,9 +277,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class LogoutSerializer(serializers.Serializer):
   """
-  Cerrar sesión
+  Valida que se proporcione el refresh token para cerrar sesión.
   """
-
   refresh = serializers.CharField()
 
   def validate(self, attrs):

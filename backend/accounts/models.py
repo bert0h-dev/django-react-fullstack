@@ -41,8 +41,8 @@ class User(AbstractUser, PermissionsMixin):
   position = models.CharField(max_length=50, null=True, blank=True, verbose_name='position')
 
   # Preferencias
-  # language = models.CharField(max_length=10, default='es', verbose_name='language')
-  # timezone = models.CharField(max_length=50, default='America/Mexico_City', verbose_name='timezone')
+  language = models.CharField(max_length=10, default='es', verbose_name='language')
+  timezone = models.CharField(max_length=50, default='America/Mexico_City', verbose_name='timezone')
 
   # Seguridad
   is_verified = models.BooleanField(default=False, verbose_name='is verified')
@@ -60,6 +60,14 @@ class User(AbstractUser, PermissionsMixin):
 
   USERNAME_FIELD = 'email'
   REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'first_surname', 'last_surname']
+
+  class Meta:
+    ordering = ['-date_joined']
+    db_table = 'accounts_user'
+    indexes = [
+      models.Index(fields=['email'], name='idx_accounts_user_email'),
+      models.Index(fields=['username'], name='idx_accounts_user_username'),
+    ]
 
   def __str__(self):
     return self.email
