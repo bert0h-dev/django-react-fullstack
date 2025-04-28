@@ -6,7 +6,7 @@ from decouple import config
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = config('DJANGO_SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
-API_VERSION = "1.0.1" # Version de la API
+API_VERSION = "1.0.0" # Version de la API
 ALLOWED_HOSTS = [config('ALLOWED_HOSTS')]
 
 INSTALLED_APPS = [

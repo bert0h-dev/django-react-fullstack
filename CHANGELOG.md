@@ -18,7 +18,7 @@ El formato sigue el estándar [Keep a Changelog](https://keepachangelog.com/es-E
 - Integración de CI/CD con GitHub Actions.
 - Documentación OpenAPI completa (Swagger UI).
 
-## [1.0.1] - 2024-04-28
+## [1.0.0] - 2024-04-28
 
 ### Agregado
 
