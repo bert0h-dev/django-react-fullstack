@@ -1,27 +1,15 @@
+from rest_framework.routers import DefaultRouter
 from django.urls import path
+from .views import LoginView, LogoutView, RefreshTokenView, UserViewSet
 
-from .views import (
-    # Autenticación
-    LoginView, LogoutView,
-    # Usuarios
-    UserListView, RegisterView, 
-    MeView, UpdateProfileView,
-    ChangePasswordView,
-    # Roles
-    AssignRolesToUserView, UserRolesView,
-)
+rUsers = DefaultRouter()
+rUsers.register(r'users', UserViewSet, basename='user')
 
 urlpatterns = [
-    # Autenticación
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
-    # Usuarios
-    path('user/me/', MeView.as_view(), name='me-profile'),
-    path('user/me/update/', UpdateProfileView.as_view(), name='me-update'),
-    path('user/me/change-password/', ChangePasswordView.as_view(), name='me-change-password'),
-    path('user/list/', UserListView.as_view(), name='user-list'),
-    path('user/register/', RegisterView.as_view(), name='user-register'),
-    # Roles
-    path('user/<int:id>/assign-roles/', AssignRolesToUserView.as_view(), name='user-assign-roles'),
-    path("user/<int:id>/roles/", UserRolesView.as_view(), name="user-roles"),
+    path('token/refresh/', RefreshTokenView.as_view(), name='token_refresh'),
 ]
+
+# Se agregan las rutas de los usuarios
+urlpatterns += rUsers.urls

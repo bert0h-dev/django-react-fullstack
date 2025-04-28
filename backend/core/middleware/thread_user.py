@@ -2,16 +2,12 @@ import threading
 
 _user = threading.local()
 
+# Obtiene el usuario actual del hilo local.
 def get_current_user():
-  """
-  Obtiene el usuario actual del hilo local.
-  """
   return getattr(_user, 'current_user', None)
 
+# Middleware para almacenar el usuario actual en un hilo local.
 class ThreadLocalUserMiddleware:
-  """
-  Middleware para almacenar el usuario actual en un hilo local.
-  """
   def __init__(self, get_response):
     self.get_response = get_response
 

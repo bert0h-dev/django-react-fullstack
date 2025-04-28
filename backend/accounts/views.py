@@ -1,106 +1,23 @@
-from rest_framework import generics, permissions, status
+from rest_framework import viewsets, permissions, status
 from rest_framework.views  import APIView
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate, get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 
 from core.utils.models import get_model_name
-from core.models import AccessTokenBlacklist
 from core.responses import api_success, api_error
 from core.decorators import log_view_action
-from core.permissions import CanViewGroup
+from core.permissions import IsAdminOrStaff
+from core.messages import ACCOUNT_LOG, ACCOUNT_SUCCESS, ACCOUNT_ERRORS
 
 from .models import User
 from .filters import UserFilter
-from .serializers import (
-  # Autenticación
-  LoginSerializer, LogoutSerializer,
-  # Usuarios
-  UserSerializer, RegisterSerializer, 
-  UserProfileSerializer, UpdateProfileSerializer,
-  ChangePasswordSerializer,
-  # Roles
-  AssignRolesSerializer, UserRolesSerializer
-)
+from .serializers import LoginSerializer, LogoutSerializer, UserSerializer, RefreshTokenSerializer, ChangePasswordSerializer
 
 User = get_user_model()
-
-@extend_schema(
-  summary="Listar usuarios del sistema",
-  description="Permite obtener una lista paginada de usuarios con filtros por email, nombre(s), apellido(s), estado activo, verificado y tipo de usuario.",
-  parameters=[
-    OpenApiParameter(name='email', description='Filtrar por email', required=False, type=str),
-    OpenApiParameter(name='first_name', description='Filtrar por primer nombre', required=False, type=str),
-    OpenApiParameter(name='last_name', description='Filtrar por segundo nombre', required=False, type=str),
-    OpenApiParameter(name='first_surname', description='Filtrar por primer apellido', required=False, type=str),
-    OpenApiParameter(name='last_surname', description='Filtrar por segundo apellido', required=False, type=str),
-    OpenApiParameter(name='is_active', description='Filtrar por estado activo', required=False, type=bool),
-    OpenApiParameter(name='is_verified', description='Filtrar por estado verificado', required=False, type=bool),
-    OpenApiParameter(name='user_type', description='Filtrar por tipo de usuario', required=False, type=str),
-  ],
-  request=UserSerializer,
-  responses={200: UserSerializer(many=True)}
-)
-class UserListView(generics.ListAPIView):
-  queryset = User.objects.all()
-  serializer_class = UserSerializer
-  filter_backends = [DjangoFilterBackend]
-  filterset_class = UserFilter
-
-  @log_view_action("Visualizó el listado de usuarios")
-  def list(self, request, *args, **kwargs):
-    queryset = self.get_queryset()
-
-    page = self.paginate_queryset(queryset)
-    if page is not None:
-      serializer = self.get_serializer(page, many=True)
-      paginated_data = self.get_paginated_response(serializer.data).data
-      return api_success(data=paginated_data, message="Lista de usuarios")
-    
-    # Si no hay paginación, se devuelve la lista completa
-    serializer = self.get_serializer(queryset, many=True)
-
-    return api_success(data=serializer.data, message="Lista de usuarios")
-
-@extend_schema(
-  summary="Obtener el perfil del usuario autenticado",
-  description="Permite obtener el perfil del usuario autenticado. Se requiere autenticación.",
-  responses={200: UserProfileSerializer},
-)
-class MeView(APIView):
-
-  @log_view_action(
-    "Visualizó perfil de usuario",
-    object_getter=lambda self, request, kwargs: self.get_object().email,
-    object_meta=lambda self, request, kwargs: {
-      "id": self.get_object().id,
-      "type": get_model_name(self.get_object())
-    }
-  )
-  def get(self, request):
-    user = request.user
-    serializer = UserProfileSerializer(user)
-    return api_success(data=serializer.data, message="Perfil de usuario")
-
-@extend_schema(
-  summary="Actualizar perfil del usuario",
-  description="Permite al usuario autenticado modificar sus datos de perfil como nombres, apellidos y zona horaria.",
-  request=UpdateProfileSerializer,
-  responses={200: UserProfileSerializer}
-)
-class UpdateProfileView(generics.UpdateAPIView):
-  serializer_class = UpdateProfileSerializer
-  
-  def get_object(self):
-    return self.request.user
-  
-  def patch(self, request, *args, **kwargs):
-    response = super().partial_update(request, *args, **kwargs)
-    user = self.get_object()
-    return api_success(data=UserProfileSerializer(user).data, message="Perfil actualizado correctamente")
 
 @extend_schema(
   summary="Cambiar contraseña del usuario autenticado",
@@ -116,97 +33,165 @@ class ChangePasswordView(APIView):
     return api_success(message="Contraseña cambiada correctamente")
 
 @extend_schema(
-  summary="Registrar un nuevo usuario",
-  description="Permite registrar un nuevo usuario en el sistema. Se requiere proporcionar email, nombre(s), apellido(s) y contraseña.",
-  request=RegisterSerializer,
-  responses={201: RegisterSerializer},
+  summary="Gestión de usuarios",
+  description="Listar, actualizar o eliminar usuarios del sistema.",
+  parameters=[
+    OpenApiParameter(name='email', description='Filtrar por email', required=False, type=str),
+    OpenApiParameter(name='first_name', description='Filtrar por nombre', required=False, type=str),
+    OpenApiParameter(name='last_name', description='Filtrar por apellido', required=False, type=str),
+    OpenApiParameter(name='is_active', description='Filtrar por estado activo', required=False, type=bool),
+  ]
 )
-class RegisterView(generics.CreateAPIView):
+class UserViewSet(viewsets.ModelViewSet):
   queryset = User.objects.all()
-  serializer_class = RegisterSerializer
-  permission_classes = [permissions.AllowAny]
+  serializer_class = UserSerializer
+  permission_classes = [IsAdminOrStaff]
+  filter_backends = [DjangoFilterBackend]
+  filterset_class = UserFilter
 
+  @log_view_action(ACCOUNT_LOG["user_list"])
+  def list(self, request, *args, **kwargs):
+    queryset = self.filter_queryset(self.get_queryset())
+
+    page = self.paginate_queryset(queryset)
+    if page is not None:
+      serializer = self.get_serializer(page, many=True)
+      paginated_data = self.get_paginated_response(serializer.data).data
+      return api_success(data=paginated_data, message=ACCOUNT_SUCCESS["user_list"])
+
+    serializer = self.get_serializer(queryset, many=True)
+    return api_success(data=serializer.data, message=ACCOUNT_SUCCESS["user_list"])
+  
+  @log_view_action(ACCOUNT_LOG["user_details"])
+  def retrieve(self, request, *args, **kwargs):
+    instance = self.get_object()
+    serializer = self.get_serializer(instance)
+    return api_success(data=serializer.data, message=ACCOUNT_SUCCESS["user_details"])
+  
+  @log_view_action(
+    ACCOUNT_LOG["user_create"], 
+    object_getter=lambda self, request, kwargs: self.get_object().email,
+    object_meta=lambda self, request, kwargs: {
+      "id": self.get_object().id,
+      "type": get_model_name(self.get_object())
+    }
+  )
   def create(self, request, *args, **kwargs):
     serializer = self.get_serializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    serializer.save()
-    # Se devuelve el usuario + el token
-    data = serializer.data
-    data['tokens'] = serializer._tokens
-    return api_success(data=data, message="Usuario registrado correctamente", status_code=status.HTTP_201_CREATED)
+    self.perform_create(serializer)
+    return api_success(data=serializer.data, message=ACCOUNT_SUCCESS["user_create"], status_code=status.HTTP_201_CREATED)
+
+  @log_view_action(
+    ACCOUNT_LOG["user_update"],
+    object_getter=lambda self, request, kwargs: self.get_object().email,
+    object_meta=lambda self, request, kwargs: {
+      "id": self.get_object().id,
+      "type": get_model_name(self.get_object())
+    }
+  )
+  def update(self, request, *args, **kwargs):
+    partial = kwargs.pop('partial', False)
+    instance = self.get_object()
+    serializer = self.get_serializer(instance, data=request.data, partial=partial)
+    serializer.is_valid(raise_exception=True)
+    self.perform_update(serializer)
+    return api_success(data=serializer.data, message=ACCOUNT_SUCCESS["user_update"])
+  
+  @log_view_action(ACCOUNT_LOG["user_destroy"])
+  def destroy(self, request, *args, **kwargs):
+    instance = self.get_object()
+    self.perform_destroy(instance)
+    return api_success(message=ACCOUNT_SUCCESS["user_destroy"], status_code=status.HTTP_204_NO_CONTENT)
 
 @extend_schema(
-  summary="Asignar roles a un usuario",
-  description="Permite asignar uno o más grupos (roles) a un usuario.",
-  request=AssignRolesSerializer,
-  responses={200: AssignRolesSerializer}
-)
-class AssignRolesToUserView(generics.UpdateAPIView):
-  queryset = User.objects.all()
-  serializer_class = AssignRolesSerializer
-  permission_classes = [CanViewGroup]
-  lookup_url_kwarg = "id"
-
-  def patch(self, request, *args, **kwargs):
-    response = super().partial_update(request, *args, **kwargs)
-    return api_success(data=response.data, message="Roles asignados correctamente")
-
-@extend_schema(
-  summary="Consultar roles asignados a un usuario",
-  description="Devuelve los grupos (roles) actualmente asignados a un usuario.",
-  responses={200: UserRolesSerializer}
-)
-class UserRolesView(generics.RetrieveAPIView):
-  queryset = User.objects.prefetch_related("groups")
-  serializer_class = UserRolesSerializer
-  permission_classes = [CanViewGroup]
-  lookup_url_kwarg = "id"
-
-  def retrieve(self, request, *args, **kwargs):
-    user = self.get_object()
-    serializer = self.get_serializer(user)
-    return api_success(data=serializer.data, message="Roles del usuario")
-
-@extend_schema(
-  summary="Obtener token de acceso",
-  description="Permite obtener un token de acceso y un token de actualización para el usuario autenticado. Se requiere proporcionar username y contraseña.",
+  summary="Iniciar sesión",
+  description="Permite a un usuario autenticarse y obtener tokens JWT.",
   request=LoginSerializer,
-  responses={200: RegisterSerializer},
+  responses={200: LoginSerializer},
 )
 class LoginView(TokenObtainPairView):
-  serializer_class = LoginSerializer
+  auuthentication_classes = []
   permission_classes = [permissions.AllowAny]
 
-  @log_view_action("Inicio de sesión")
-  def post(self, request, *args, **kwargs):
-    response = super().post(request, *args, **kwargs)
-    return api_success(data=response.data, message="Inicio de sesión exitoso")
+  @log_view_action(ACCOUNT_LOG["login"])
+  def post(self, request):
+    serializer = LoginSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    email = serializer.validated_data['email']
+    password = serializer.validated_data['password']
+
+    user = authenticate(request, username=email, password=password)
+
+    if user is None:
+      return api_error(message=ACCOUNT_ERRORS["invalid_credentials"], status_code=status.HTTP_401_UNAUTHORIZED)
+    
+    if not user.is_active:
+      return api_error(message=ACCOUNT_ERRORS["account_disabled"], status_code=status.HTTP_403_FORBIDDEN)
+      
+    refresh = RefreshToken.for_user(user)
+    access_token = str(refresh.access_token)
+    refresh_token = str(refresh)
+
+    data = {
+      "access": access_token,
+      "refresh": refresh_token,
+      "user": {
+        "id": user.id,
+        "email": user.email,
+        "username": user.username,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "user_type": user.user_type,
+      }
+    }
+
+    return api_success(data=data, message=ACCOUNT_SUCCESS["login"])
 
 @extend_schema(
-  summary="Cerrar sesión",
-  description="Cierra sesión invalidando el refresh token y el access token actual.",
-  request=LogoutSerializer,
-  responses={205: LogoutSerializer},
+    summary="Cerrar sesión",
+    description="Permite invalidar el token de refresh del usuario.",
+    request=LogoutSerializer,
+    responses={205: None}
 )
 class LogoutView(APIView):
-  serializer_class = LogoutSerializer
-
-  @log_view_action("Cierre de sesión")
+  @log_view_action(ACCOUNT_LOG["logout"])
   def post(self, request):
-    serializer = self.serializer_class(data=request.data)
+    serializer = LogoutSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
     try:
-      # 🔒 1. Invalidar el refresh token
-      refresh_token = serializer.validated_data["refresh"]
+      refresh_token = request.data.get("refresh")
       token = RefreshToken(refresh_token)
       token.blacklist()
-
-      # 🔒 2. Invalidar el access token actual usando su jti
-      access_token = request.auth 
-      jti = access_token.get("jti")
-      AccessTokenBlacklist.objects.get_or_create(token=jti)
-
-      return api_success(message="Sesión cerrada correctamente", status_code=status.HTTP_205_RESET_CONTENT)
+      return api_success(message=ACCOUNT_SUCCESS["logout"], status_code=status.HTTP_205_RESET_CONTENT)
     except TokenError:
-      return api_error(message="Token inválido o ya ha sido cerrado", status_code=status.HTTP_400_BAD_REQUEST)
+      return api_error(message=ACCOUNT_ERRORS["token_invalid"], status_code=status.HTTP_400_BAD_REQUEST)
+
+@extend_schema(
+  summary="Refrescar token de acceso",
+  description="Permite obtener un nuevo access token usando un refresh token válido.",
+  request=RefreshTokenSerializer,
+  responses={200: RefreshTokenSerializer}
+)
+class RefreshTokenView(APIView):
+  permission_classes = [permissions.AllowAny]
+  authentication_classes = []  # No se necesita estar logueado para refrescar
+  
+  @log_view_action(ACCOUNT_LOG["token_refresh"])
+  def post(self, request):
+    serializer = RefreshTokenSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    refresh_token = serializer.validated_data.get("refresh")
+
+    try:
+      refresh = RefreshToken(refresh_token)
+      access_token = str(refresh.access_token)
+      data = {
+        "access": access_token,
+      }
+      return api_success(data=data, message=ACCOUNT_SUCCESS["token_refresh"])
+    except TokenError:
+      return api_error(message=ACCOUNT_ERRORS["token_invalid"], status_code=status.HTTP_401_UNAUTHORIZED)

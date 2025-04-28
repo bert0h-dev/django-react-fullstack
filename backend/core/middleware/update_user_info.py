@@ -4,18 +4,15 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Middleware que actualiza `last_activity` y `last_ip` del usuario autenticado en cada request.
 class UpdateUserInfoMiddleware:
-  """
-  Middleware que actualiza `last_activity` y `last_ip` del usuario autenticado en cada request.
-  """
-
   def __init__(self, get_response):
     self.get_response = get_response
 
   def __call__(self, request):
     response = self.get_response(request)
 
-    # 🚫 Ignorar rutas que no son API
+    # Ignorar rutas que no son API
     if not request.path.startswith("/api/"):
       return response
 

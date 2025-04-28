@@ -9,11 +9,8 @@ from django.conf import settings
 
 API_VERSION = getattr(settings, 'API_VERSION', '1.0.0')  # Por si no está definida
 
+# Se personaliza el retorno de handle.
 def custom_exception_handler(exc, context):
-  """
-  Se personaliza el retorno de handle.
-  """
-
   response = exception_handler(exc, context)
 
   if response is not None:

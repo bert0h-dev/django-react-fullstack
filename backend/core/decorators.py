@@ -14,35 +14,52 @@ def log_view_action(action_base, object_getter=None, object_meta=None):
   - object_meta: Función que devuelve dict con 'id' y 'type' (opcional).
   """
 
-  def decorator(func):
-    @wraps(func)
-    def wrapper(self, request, *args, **kwargs):
-      user = request.user
-      if user and user.is_authenticated:
+  def decorator(view_func):
+    @wraps(view_func)
+    def _wrapped_view(self, request, *args, **kwargs):
+      response = view_func(self, request, *args, **kwargs)
+      
+      try:
+        user = request.user if request.user.is_authenticated else None
+        method = request.method
+        path = request.path
+        status_code = response.status_code
+        ip_address = get_client_ip(request)
+        user_agent = request.META.get('HTTP_USER_AGENT', '')
+        message = response.data.get('message') if hasattr(response, 'data') and isinstance(response.data, dict) else ''
+
         dynamic_part = ""
         meta = {}
-
+        
         if object_getter:
           try:
-            dynamic_part = " " + str(object_getter(self, request, kwargs))
+            dynamic_part = ": " + str(object_getter(self, request, kwargs))
           except Exception:
-            dynamic_part = " (No se pudo obtener el nombre dinámico)"
+            dynamic_part = ": (Not able to get dynamic name)"
         
         if object_meta:
           try:
             meta = object_meta(self, request, kwargs) or {}
           except Exception:
             meta = {}
-          
+        
         AccessLog.objects.create(
           user=user,
-          ip_address=get_client_ip(request),
-          timestamp=now(),
+          method=method,
+          path=path,
+          action=f"{action_base}{dynamic_part}" or f"{view_func.__name__}{dynamic_part}",
+          status_code=status_code,
+          message=message,
+          ip_address=ip_address,
+          user_agent=user_agent,
           object_id=meta.get("id"),
           object_type=meta.get("type"),
-          action=f"{action_base}{dynamic_part}",
-          user_agent=request.META.get("HTTP_USER_AGENT", "")
+          created_at=now(),
         )
-      return func(self, request, *args, **kwargs)
-    return wrapper
+      except Exception as e:
+        # No fallamos la request si falla el log, solo registramos el error en consola
+        print(f"[AccessLog Error] No se pudo registrar el log: {str(e)}")
+        
+      return response
+    return _wrapped_view
   return decorator

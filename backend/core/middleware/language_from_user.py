@@ -1,11 +1,8 @@
 from django.utils import translation
 
+# Middleware que activa el idioma configurado en el modelo del usuario autenticado.
+# Debe ir después de AuthenticationMiddleware y antes de LocaleMiddleware.
 class LanguageFromUserMiddleware:
-  """
-  Middleware que activa el idioma configurado en el modelo del usuario autenticado.
-  Debe ir después de AuthenticationMiddleware y antes de LocaleMiddleware.
-  """
-  
   def __init__(self, get_response):
     self.get_response = get_response
 

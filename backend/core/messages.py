@@ -1,25 +1,35 @@
 from django.utils.translation import gettext_lazy as _
 
 ACCOUNT_ERRORS = {
-  'invalid_email': _("El formato del email no es válido."),
-  'email_exists': _("Ya existe un usuario con ese email."),
-
-  'invalid_current_password': _("La contraseña actual es incorrecta."),
-  'passwords_do_not_match': _("Las contraseñas no coinciden."),
-
-  'first_name_letters_only': _("El primer nombre solo puede contener letras."),
-  'first_name_too_short': _("El primer nombre debe tener al menos 2 caracteres."),
-  'last_name_letters_only': _("El segundo nombre solo puede contener letras."),
-  'last_name_too_short': _("El segundo nombre debe tener al menos 2 caracteres."),
-  
-  'first_surname_letters_only': _("El primer apellido solo puede contener letras."),
-  'first_surname_too_short': _("El primer apellido debe tener al menos 2 caracteres."),
-  'last_surname_letters_only': _("El segundo apellido solo puede contener letras."),
-  'last_surname_too_short': _("El segundo apellido debe tener al menos 2 caracteres."),
-
-  'user_not_found': _("No se encontró ninguna cuenta con ese correo."),
-  'invalid_password': _("Contraseña incorrecta."),
-  'not_verified': _("Tu cuenta aún no ha sido verificada."),
+  'invalid_credentials': _("Credenciales inválidas."),
   'account_disabled': _("Esta cuenta está desactivada."),
-  'missing_refresh_token': _("El token de actualización es requerido."),
+  'token_required': _("El token es requerido."),
+  'token_invalid': _("El token es inválido o ya ha sido cerrado."),
+}
+
+ACCOUNT_SUCCESS = {
+  'login': _("Inicio de sesión exitoso."),
+  'logout': _("Cierre de sesión exitoso."),
+  'token_refresh': _("Token actualizado exitosamente."),
+
+  'user_list': _("Lista de usuarios."),
+  'user_details': _("Detalles del usuario."),
+  'user_create': _("Usuario creado exitosamente."),
+  'user_update': _("Usuario actualizado correctamente."),
+  'user_destroy': _("Usuario eliminado correctamente."),
+}
+
+ACCOUNT_LOG = {
+  'login': _("Inicio de sesión"),
+  'logout': _("Cierre de sesión"),
+  'token_refresh': _("Actualización de token"),
+
+  'log_list': _("Visualizó el listado de logs"),
+  'log_details': _("Visualizó los detalles del log"),
+
+  'user_list': _("Visualizó el listado de usuarios"),
+  'user_details': _("Visualizó los detalles del usuario"),
+  'user_create': _("Creó un nuevo usuario"),
+  'user_update': _("Actualizó el usuario"),
+  'user_destroy': _("Eliminó el usuario"),
 }
