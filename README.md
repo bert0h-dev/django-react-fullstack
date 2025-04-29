@@ -1,4 +1,4 @@
-# 🚀 Proyecto Backend API - [Nombre del Proyecto]
+# 🚀 Proyecto Backend API - Sistema de Autenticación y Auditoría
 
 Bienvenido a este proyecto backend profesional desarrollado en **Django REST Framework**.  
 Aquí aplicamos **arquitectura limpia, control de versiones profesional** y una **gestión pro de cambios** siguiendo los mejores estándares de la industria. 💻🔥
