@@ -20,6 +20,10 @@
 .history
 .ionide
 
+### Manuales personales ###
+# Ignorar archivos que tengan los nombres personal
+*develop.md
+
 ### Django ###
 *.log
 *.pot

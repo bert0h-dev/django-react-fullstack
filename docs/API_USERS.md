@@ -101,7 +101,6 @@ Elimina un usuario específico de manera segura.
 | `last_name`   | string  | Apellido                                 |
 | `user_type`   | string  | admin / user                             |
 | `is_active`   | bool    | Si el usuario está activo                 |
-| `is_verified` | bool    | Si el usuario está verificado             |
 | `last_activity` | datetime | Última actividad                        |
 
 ## 🚀 Validaciones en Register
