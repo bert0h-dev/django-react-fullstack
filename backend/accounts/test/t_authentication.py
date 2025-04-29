@@ -16,7 +16,6 @@ class AuthenticationTests(APITestCase):
       first_name='Test',
       last_name='User',
       user_type='staff',
-      is_verified=True,
       is_active=True
     )
 

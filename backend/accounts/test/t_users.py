@@ -4,8 +4,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 
-from accounts.factories import UserFactory
-
 User = get_user_model()
 
 class UserViewSetTests(APITestCase):

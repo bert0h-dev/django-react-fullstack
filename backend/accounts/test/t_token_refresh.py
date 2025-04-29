@@ -14,7 +14,6 @@ class RefreshTokenTests(APITestCase):
       password='RefreshPass123',
       first_name='Refresh',
       last_name='User',
-      is_verified=True,
       is_active=True
     )
 

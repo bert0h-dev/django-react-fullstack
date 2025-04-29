@@ -4,58 +4,62 @@ import openpyxl
 import json
 import xml.etree.ElementTree as ET
 
-from rest_framework import generics, status
+from rest_framework import status
 from rest_framework.views import APIView
+from rest_framework.viewsets import ReadOnlyModelViewSet
 
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 from django.http import HttpResponse
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema, OpenApiParameter
 
-from .models import AccessLog
-from .messages import ACCOUNT_LOG
-from .filters import AccessLogFilter
-from .decorators import log_view_action
-from .responses import api_success
-from .permissions import IsAdminOrStaff
-from .serializers import AccessLogSerializer
-from .utils.models import get_model_name
+from core.models import AccessLog
+from core.filters import AccessLogFilter
+from core.responses import api_success
+from core.messages import MSG_LOGS, MSG_SUCCESS
+from core.permissions import IsAdminOrStaff
+from core.decorators import log_view_action
+from core.utils.models import get_model_name
+from core.utils.mixins import ListOnlyMixin
+from core.serializers.s_logs import AccessLogSerializer
 
 User = get_user_model()
 
-@extend_schema(
-  summary="Listar registros de acceso",
-  description="Permite listar registros de acceso de usuarios. Solo accesible a administradores o staff.",
-  parameters=[
-    OpenApiParameter(name='user', description='ID del usuario', required=False, type=int),
-    OpenApiParameter(name='method', description='Método HTTP', required=False, type=str),
-    OpenApiParameter(name='status_code', description='Código de respuesta HTTP', required=False, type=int),
-    OpenApiParameter(name='path', description='Ruta contiene', required=False, type=str),
-    OpenApiParameter(name='action', description='Acción realizada', required=False, type=str),
-    OpenApiParameter(name='created_at__date', description='Desde fecha y hora (YYYY-MM-DDTHH:SS)', required=False, type=str),
-    OpenApiParameter(name='created_at__lte', description='Hasta fecha y hora (YYYY-MM-DDTHH:SS)', required=False, type=str),
-  ]
+@extend_schema_view(
+  list=extend_schema(
+    summary="Listar registros de acceso",
+    description="Permite listar registros de acceso de usuarios. Solo accesible a administradores o staff.",
+    parameters=[
+      OpenApiParameter(name='user', description='ID del usuario', required=False, type=int),
+      OpenApiParameter(name='method', description='Método HTTP', required=False, type=str),
+      OpenApiParameter(name='status_code', description='Código de respuesta HTTP', required=False, type=int),
+      OpenApiParameter(name='path', description='Ruta contiene', required=False, type=str),
+      OpenApiParameter(name='action', description='Acción realizada', required=False, type=str),
+      OpenApiParameter(name='created_at__date', description='Desde fecha y hora (YYYY-MM-DDTHH:SS)', required=False, type=str),
+      OpenApiParameter(name='created_at__lte', description='Hasta fecha y hora (YYYY-MM-DDTHH:SS)', required=False, type=str),
+    ]
+  ),
+  retrieve=extend_schema(
+    summary="Detalle de registro de acceso",
+    description="Ver detalle del log específico."
+  )
 )
-class AccessLogListView(generics.ListAPIView):
+class AccessLogListView(ListOnlyMixin, ReadOnlyModelViewSet):
   queryset = AccessLog.objects.select_related('user').all()
   serializer_class = AccessLogSerializer
   permission_classes = [IsAdminOrStaff]
   filter_backends = [DjangoFilterBackend]
   filterset_class = AccessLogFilter
 
-  @log_view_action(ACCOUNT_LOG["log_list"])
-  def list(self, request, *args, **kwargs):
-    queryset = self.filter_queryset(self.get_queryset())
-    page = self.paginate_queryset(queryset)
-    if page is not None:
-      serializer = self.get_serializer(page, many=True)
-      return api_success(data=self.get_paginated_response(serializer.data).data, message="Listado de logs de acceso", status=status.HTTP_200_OK)
+  # Configuracion de mixin
+  log_list_action = MSG_LOGS["log_list"]
+  success_list = MSG_SUCCESS["log_list"]
 
-    serializer = self.get_serializer(queryset, many=True)
-    return api_success(data=serializer.data, message="Listado de logs de acceso", status=status.HTTP_200_OK)
+  def get_queryset(self):
+    return AccessLog.objects.select_related('user').all()
   
   @log_view_action(
-    ACCOUNT_LOG["log_details"], 
+    MSG_LOGS["log_details"], 
     object_getter=lambda self, request, kwargs: self.get_object().action,
     object_meta=lambda self, request, kwargs: {
       "id": self.get_object().id,
@@ -65,7 +69,7 @@ class AccessLogListView(generics.ListAPIView):
   def retrieve(self, request, *args, **kwargs):
     instance = self.get_object()
     serializer = self.get_serializer(instance)
-    return api_success(data=serializer.data, message="Detalle del log de acceso", status=status.HTTP_200_OK)
+    return api_success(data=serializer.data, message=MSG_SUCCESS["log_details"], status=status.HTTP_200_OK)
 
 @extend_schema(
   summary="Exportar registros de acceso",
@@ -87,6 +91,7 @@ class AccessLogExportView(APIView):
   filter_backends = [DjangoFilterBackend]
   filterset_class = AccessLogFilter
 
+  @log_view_action(MSG_LOGS["log_export"])
   def get(self, request, format=None):
     queryset = AccessLog.objects.select_related('user').all()
     for backend in list(self.filter_backends):

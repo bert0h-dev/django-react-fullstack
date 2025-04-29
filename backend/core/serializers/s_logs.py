@@ -1,5 +1,7 @@
 from rest_framework import serializers
+
 from django.contrib.auth.models import Group, Permission
+
 from core.models import AccessLog
 
 # Serializador para el historial de accesos al sistema.

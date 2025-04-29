@@ -41,7 +41,6 @@ class User(AbstractUser, PermissionsMixin):
   timezone = models.CharField(max_length=50, default='America/Mexico_City')
 
   # Seguridad
-  requires_password_reset = models.BooleanField(default=True)
   password_changed = models.BooleanField(default=False)
   last_ip = models.GenericIPAddressField(null=True, blank=True)
 
@@ -69,5 +68,4 @@ class User(AbstractUser, PermissionsMixin):
   def set_password(self, raw_password):
     super().set_password(raw_password)
     self.password_changed = True
-    self.requires_password_reset = False
     self.save()
