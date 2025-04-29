@@ -18,9 +18,31 @@ El formato sigue el estándar [Keep a Changelog](https://keepachangelog.com/es-E
 - Integración de CI/CD con GitHub Actions.
 - Documentación OpenAPI completa (Swagger UI).
 
+## [v1.0.1] - 2024-05-01
+
+### Agregado en v1.0.1
+
+- CRUD completo de Roles (`RoleViewSet`).
+- Endpoint para asignar permisos directos a usuarios (`assign-permissions`).
+- Endpoint para asignar roles directos a usuarios (`assign-role`).
+
+### Mejorado en v1.0.1
+
+- Integración de `ListFilterOnlyMixin` para filtros inteligentes en listados.
+- Documentación Swagger por operación (`list`, `retrieve`, `create`, `update`, `delete`).
+- Se crearon carpetas de Serializer, Views, Urls donde se centraliza la información separado por proceso para tener un orden mas claro.
+
+### Corregido en v1.0.1
+
+- Validación para evitar eliminación de roles en uso.
+
+### Eliminado en v1.0.1
+
+- Se eliminaron los archivos urls.py, view.py y serializer.py de las apps `accounts` y `core`.
+
 ## [1.0.0] - 2024-04-28
 
-### Agregado
+### Agregado en v1.0.0
 
 - Versión inicial estable del sistema backend.
 - Entornos separados para desarrollo y producción.
