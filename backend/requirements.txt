@@ -6,13 +6,17 @@ django-filter==25.1
 djangorestframework==3.16.0
 djangorestframework_simplejwt==5.5.0
 drf-spectacular==0.28.0
+et_xmlfile==2.0.0
 factory_boy==3.3.3
 Faker==37.1.0
 inflection==0.5.1
 jsonschema==4.23.0
 jsonschema-specifications==2024.10.1
+openpyxl==3.1.5
+psycopg2-binary==2.9.10
 PyJWT==2.9.0
 python-decouple==3.8
+python-dotenv==1.1.0
 PyYAML==6.0.2
 referencing==0.36.2
 rpds-py==0.24.0

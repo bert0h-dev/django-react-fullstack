@@ -1,12 +1,22 @@
 import os
 from pathlib import Path
-from decouple import config
+from dotenv import load_dotenv
 from datetime import timedelta
 
+# 🧠 BASE_DIR apunta a /backend/app
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = config('DJANGO_SECRET_KEY')
-DEBUG = config('DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = []
+
+# 📁 Ruta hacia la raíz del proyecto donde está el .env (2 niveles arriba
+ROOT_DIR = BASE_DIR.parent.parent 
+
+# 📦 Cargar el .env desde la raíz
+load_dotenv(dotenv_path=ROOT_DIR / ".env")
+
+# ✅ Uso de variables
+SECRET_KEY = os.getenv("SECRET_KEY", "clave_por_defecto_segura")
+DEBUG = os.getenv("DEBUG", "0") == "1"
+
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(",")
 
 # Version de la API
 API_VERSION = "1.0.1"
@@ -76,23 +86,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'app.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 # DATABASES = {
-#   'default': {
-#     'ENGINE': 'django.db.backends.postgresql',
-#     'NAME': os.getenv('POSTGRES_DB', 'dev_db'),
-#     'USER': os.getenv('POSTGRES_USER', 'postgres'),
-#     'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
-#     'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
-#     'PORT': '5432',
-#   }
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
 # }
+
+DATABASES = {
+  'default': {
+    'ENGINE': 'django.db.backends.postgresql',
+    'NAME': os.getenv('POSTGRES_DB', 'dev_db'),
+    'USER': os.getenv('POSTGRES_USER', 'postgres'),
+    'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
+    'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
+    'PORT': '5432',
+  }
+}
+# sudo docker compose up --build web
 
 # Produccion
 # SECURE_HSTS_SECONDS = 3600
