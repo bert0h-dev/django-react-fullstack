@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-23 22:46-0700\n"
+"POT-Creation-Date: 2025-04-29 04:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,137 +19,290 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? "
 "1 : 2;\n"
 
-#: accounts/models.py:37
-msgid "Spanish"
-msgstr "Español"
+#: accounts/models.py:28
+msgid "Español"
+msgstr "Spanish"
 
-#: accounts/models.py:38
-msgid "English"
-msgstr "Inglés"
-
-#: accounts/signals.py:17
-msgid "Can create users"
-msgstr "Puede crear usuarios"
-
-#: accounts/signals.py:18
-msgid "Can edit users"
-msgstr "Puede editar usuarios"
-
-#: accounts/signals.py:19
-msgid "Can delete users"
-msgstr "Puede eliminar usuarios"
+#: accounts/models.py:29
+msgid "Inglés"
+msgstr "English"
 
 #: accounts/signals.py:20
-msgid "Can view users"
-msgstr "Puede ver usuarios"
+msgid "Puede crear usuarios"
+msgstr "Can create users"
 
-#: core/messages.py:4
-msgid "The email format is invalid."
-msgstr "El formato del email no es válido."
+#: accounts/signals.py:21
+msgid "Puede editar usuarios"
+msgstr "Can edit users"
+
+#: accounts/signals.py:22
+msgid "Puede eliminar usuarios"
+msgstr "Can delete users"
+
+#: accounts/signals.py:23
+msgid "Puede ver usuarios"
+msgstr "Can view users"
 
 #: core/messages.py:5
-msgid "A user with this email already exists."
-msgstr "Ya existe un usuario con ese email."
+msgid "Credenciales inválidas."
+msgstr "Invalid credentials."
+
+#: core/messages.py:6
+msgid "Esta cuenta está desactivada."
+msgstr "This account is disabled."
 
 #: core/messages.py:7
-msgid "La contraseña actual es incorrecta."
-msgstr ""
+msgid "El token es requerido."
+msgstr "Token is required."
 
 #: core/messages.py:8
-msgid "Las contraseñas no coinciden."
-msgstr ""
+msgid "El token es inválido o ya ha sido cerrado."
+msgstr "The token is invalid or already closed."
 
 #: core/messages.py:10
-msgid "El primer nombre solo puede contener letras."
-msgstr ""
+msgid "Usuario no encontrado"
+msgstr "User not found"
 
 #: core/messages.py:11
-msgid "El primer nombre debe tener al menos 2 caracteres."
-msgstr ""
+msgid "La contraseña actual es incorrecta."
+msgstr "Current password is incorrect."
 
 #: core/messages.py:12
-msgid "El segundo nombre solo puede contener letras."
-msgstr ""
+msgid "Las contraseñas no coinciden."
+msgstr "Passwords do not match."
 
 #: core/messages.py:13
-msgid "El segundo nombre debe tener al menos 2 caracteres."
-msgstr ""
+msgid "La contraseña debe tener al menos 8 caracteres."
+msgstr "Password must be at least 8 characters long."
+
+#: core/messages.py:14
+msgid "La contraseña debe contener al menos una letra mayúscula."
+msgstr "The password must contain at least one capital letter."
 
 #: core/messages.py:15
-msgid "El primer apellido solo puede contener letras."
-msgstr ""
+msgid "La contraseña debe contener al menos una letra minúscula."
+msgstr "The password must contain at least one lowercase letter."
 
 #: core/messages.py:16
-msgid "El primer apellido debe tener al menos 2 caracteres."
-msgstr ""
+msgid "La contraseña debe contener al menos un número."
+msgstr "The password must contain at least one number."
 
 #: core/messages.py:17
-msgid "El segundo apellido solo puede contener letras."
-msgstr ""
+#, python-format
+msgid "La contraseña debe contener al menos un carácter especial (!@#$% etc)."
+msgstr "The password must contain at least one special character (!@#$% etc)."
 
-#: core/messages.py:18
-msgid "El segundo apellido debe tener al menos 2 caracteres."
-msgstr ""
+#: core/messages.py:19
+msgid "Ya existe un rol con este nombre."
+msgstr "There is already a role with this name."
 
 #: core/messages.py:20
-msgid "No se encontró ninguna cuenta con ese correo."
-msgstr ""
+msgid "Debe ser una lista de IDs de permisos."
+msgstr "This should be a list of permit IDs."
 
 #: core/messages.py:21
-msgid "Contraseña incorrecta."
-msgstr ""
-
-#: core/messages.py:22
-msgid "Tu cuenta aún no ha sido verificada."
-msgstr ""
+msgid "No se puede eliminar un rol que tiene usuarios asignados"
+msgstr "You cannot delete a role with assigned users"
 
 #: core/messages.py:23
-msgid "Esta cuenta está desactivada."
-msgstr ""
+msgid "Debe enviar una lista de IDs de permisos"
+msgstr "You must send a list of permit IDs"
 
-#: core/messages.py:24
-msgid "El token de actualización es requerido."
-msgstr ""
+#: core/messages.py:28
+msgid "Inicio de sesión exitoso."
+msgstr "Successful login."
 
-#: core/models.py:29
+#: core/messages.py:29
+msgid "Cierre de sesión exitoso."
+msgstr "Successful logout."
+
+#: core/messages.py:30
+msgid "Token actualizado exitosamente."
+msgstr "Token updated successfully."
+
+#: core/messages.py:32
+msgid "Lista de usuarios."
+msgstr "Users list."
+
+#: core/messages.py:33
+msgid "Detalles del usuario."
+msgstr "User's details."
+
+#: core/messages.py:34
+msgid "Usuario creado exitosamente."
+msgstr "Successfully created user."
+
+#: core/messages.py:35
+msgid "Usuario actualizado correctamente."
+msgstr "Successfully updated user."
+
+#: core/messages.py:36
+msgid "Contraseña cambiada correctamente."
+msgstr "Password successfully changed."
+
+#: core/messages.py:37
+msgid "Usuario eliminado correctamente."
+msgstr "Successfully deleted user."
+
+#: core/messages.py:39
+msgid "Lista de roles."
+msgstr "Role list."
+
+#: core/messages.py:40
+msgid "Detalles del rol."
+msgstr "Details of the role."
+
+#: core/messages.py:41
+msgid "Rol creado exitosamente."
+msgstr "Successfully created role."
+
+#: core/messages.py:42
+msgid "Rol actualizado exitosamente."
+msgstr "Successfully updated role."
+
+#: core/messages.py:43
+msgid "Rol eliminado exitosamente."
+msgstr "Successfully deleted role."
+
+#: core/messages.py:44
+msgid "Rol asignado exitosamente."
+msgstr "Successfully assigned role."
+
+#: core/messages.py:46
+msgid "Permiso asignado exitosamente."
+msgstr "Successfully assigned permit."
+
+#: core/messages.py:48
+msgid "Listado de logs de acceso."
+msgstr "Access log list."
+
+#: core/messages.py:49
+msgid "Detalle del log de acceso."
+msgstr "Access log detail."
+
+#: core/messages.py:54
 msgid "Inicio de sesión"
-msgstr ""
+msgstr "Login"
 
-#: core/models.py:30
+#: core/messages.py:55
 msgid "Cierre de sesión"
-msgstr ""
+msgstr "Logout"
 
-#: core/models.py:31
-msgid "Intento fallido"
-msgstr ""
+#: core/messages.py:56
+msgid "Actualización de token"
+msgstr "Token update"
 
-#: core/models.py:32
-msgid "Cambio de contraseña"
-msgstr ""
+#: core/messages.py:58
+msgid "Visualizó el listado de usuarios"
+msgstr "Viewed the list of users"
 
-#: core/models.py:33
-msgid "Actualización de perfil"
-msgstr ""
+#: core/messages.py:59
+msgid "Visualizó los detalles del usuario"
+msgstr "Viewed user details"
 
-#: core/models.py:34
-msgid "Registro"
-msgstr ""
+#: core/messages.py:60
+msgid "Creó un nuevo usuario"
+msgstr "Created new user"
 
-#: core/signals.py:17
-msgid "Puede crear logs de acceso"
-msgstr ""
+#: core/messages.py:61
+msgid "Actualizó el usuario"
+msgstr "Updated user"
 
-#: core/signals.py:18
-msgid "Puede editar logs de acceso"
-msgstr ""
+#: core/messages.py:62
+msgid "Actualizó la contraseña del usuario"
+msgstr "Updated user password"
 
-#: core/signals.py:19
-msgid "Puede eliminar logs de acceso"
-msgstr ""
+#: core/messages.py:63
+msgid "Eliminó el usuario"
+msgstr "Deleted user"
+
+#: core/messages.py:65
+msgid "Visualizó el listado de roles"
+msgstr "Viewed the list of roles"
+
+#: core/messages.py:66
+msgid "Visualizó el detalle del rol"
+msgstr "Viewed the role detail"
+
+#: core/messages.py:67
+msgid "Creó un nuevo rol"
+msgstr "Created new role"
+
+#: core/messages.py:68
+msgid "Actualizó el rol"
+msgstr "Updated role"
+
+#: core/messages.py:69
+msgid "Eliminó el rol"
+msgstr "Eliminated role"
+
+#: core/messages.py:70
+msgid "Rol asignado"
+msgstr "Assigned role"
+
+#: core/messages.py:72
+msgid "Permiso asignado"
+msgstr "Assigned permit"
+
+#: core/messages.py:74
+msgid "Visualizó el listado de logs"
+msgstr "Viewed the log list"
+
+#: core/messages.py:75
+msgid "Visualizó los detalles del log"
+msgstr "Viewed log details"
+
+#: core/messages.py:76
+msgid "Listado de logs de acceso con exportación."
+msgstr "Access log list with export"
 
 #: core/signals.py:20
+msgid "Puede crear logs de acceso"
+msgstr "Can create access logs"
+
+#: core/signals.py:21
+msgid "Puede editar logs de acceso"
+msgstr "Can edit access logs"
+
+#: core/signals.py:22
+msgid "Puede eliminar logs de acceso"
+msgstr "Can delete access logs"
+
+#: core/signals.py:23
 msgid "Puede ver logs de acceso"
-msgstr ""
+msgstr "Can view access logs"
+
+#: core/signals.py:43
+msgid "Puede crear grupos"
+msgstr "Can create groups"
+
+#: core/signals.py:44
+msgid "Puede editar grupos"
+msgstr "Can edit groups"
+
+#: core/signals.py:45
+msgid "Puede eliminar grupos"
+msgstr "Can delete groups"
+
+#: core/signals.py:46
+msgid "Puede ver grupos"
+msgstr "Can view groups"
+
+#: core/signals.py:49
+msgid "Puede crear permisos"
+msgstr "Can create permissions"
+
+#: core/signals.py:50
+msgid "Puede editar permisos"
+msgstr "Can edit permissions"
+
+#: core/signals.py:51
+msgid "Puede eliminar permisos"
+msgstr "Can delete permissions"
+
+#: core/signals.py:52
+msgid "Puede ver permisos"
+msgstr "Can view permissions"
 
 #: venv/lib/python3.12/site-packages/django/contrib/messages/apps.py:16
 msgid "Messages"
@@ -1402,3 +1555,27 @@ msgid ""
 "    - JSON: application/vnd.oai.openapi+json\n"
 "    "
 msgstr ""
+
+#~ msgid "Spanish"
+#~ msgstr "Español"
+
+#~ msgid "English"
+#~ msgstr "Inglés"
+
+#~ msgid "Can create users"
+#~ msgstr "Puede crear usuarios"
+
+#~ msgid "Can edit users"
+#~ msgstr "Puede editar usuarios"
+
+#~ msgid "Can delete users"
+#~ msgstr "Puede eliminar usuarios"
+
+#~ msgid "Can view users"
+#~ msgstr "Puede ver usuarios"
+
+#~ msgid "The email format is invalid."
+#~ msgstr "El formato del email no es válido."
+
+#~ msgid "A user with this email already exists."
+#~ msgstr "Ya existe un usuario con ese email."
