@@ -8,9 +8,6 @@ Aquí aplicamos **arquitectura limpia, control de versiones profesional** y una 
 - **Backend:** Django 4.x + Django REST Framework
 - **Documentación API:** DRF Spectacular (Swagger UI)
 - **Base de Datos:** PostgreSQL
-- **Versionado:** Git + SemVer (v1.0.0, v1.0.1, etc.)
-- **Control de cambios:** `CHANGELOG.md`
-- **Flujo de ramas:** `main`, `feature/*`, `bugfix/*`, `release/*`, `hotfix/*`
 
 ## 🛢️ Gestión de traducciones (i18n)
 
